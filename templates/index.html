@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container">
+            <h1>🎯 Productivity Tracker</h1>
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <nav class="nav-links">
+                    <a href="/" class="active">Dashboard</a>
+                    <a href="/labels">Manage Labels</a>
+                </nav>
+                <div class="theme-switcher">
+                    <span class="theme-icon sun">☀️</span>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+                    <span class="theme-icon moon">🌙</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="dashboard">
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Activity Logger Section -->
+                <section class="activity-logger">
+                    <h2>📝 Log Activity</h2>
+                    <form id="activity-form" class="activity-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activity-date">Date</label>
+                                <input type="date" id="activity-date" name="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activity-duration">Duration (min)</label>
+                                <input type="number" id="activity-duration" name="duration" 
+                                       min="1" max="1440" placeholder="30" required>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">➕ Add & Save Activity</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="activity-label">Activity Type</label>
+                            <select id="activity-label" name="label" required>
+                                <option value="">Select activity type...</option>
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                    </form>
+
+                    <!-- Today's Activities List -->
+                    <div class="activity-list-section">
+                        <h3>Today's Activities</h3>
+                        <div id="activity-list" class="activity-list">
+                            <!-- Activities populated by JavaScript -->
+                        </div>
+                        <p style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); text-align: center;">
+                            ✨ Activities are automatically saved when added or removed
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Productivity Calendar -->
+                <section class="calendar-container">
+                    <div class="calendar-header">
+                        <h2>📊 Productivity Calendar</h2>
+                        <div class="calendar-legend">
+                            <span class="legend-label">Less</span>
+                            <div class="legend-scale">
+                                <div class="legend-cell level-0" title="No activity"></div>
+                                <div class="legend-cell level-1" title="1-25 points"></div>
+                                <div class="legend-cell level-2" title="26-50 points"></div>
+                                <div class="legend-cell level-3" title="51-75 points"></div>
+                                <div class="legend-cell level-4" title="76-100 points"></div>
+                            </div>
+                            <span class="legend-label">More</span>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <div class="loading">Loading calendar...</div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Today's Score Panel -->
+                <div class="today-panel">
+                    <h3>🚀 Today's Progress</h3>
+                    <div id="today-score" class="today-score">0 pts</div>
+                    <p style="text-align: center; font-size: 12px; color: var(--text-secondary);">
+                        Keep going! Target: 100 points
+                    </p>
+                </div>
+
+                <!-- Statistics Panel -->
+                <div class="stats-panel">
+                    <h3>📈 Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Days</span>
+                        <span class="stat-value" id="total-days">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Productive Days</span>
+                        <span class="stat-value" id="productive-days">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Max Score</span>
+                        <span class="stat-value" id="max-score">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Avg Score</span>
+                        <span class="stat-value" id="avg-score">0</span>
+                    </div>
+                </div>
+
+                <!-- Quick Tips Panel -->
+                <div class="stats-panel">
+                    <h3>💡 Quick Tips</h3>
+                    <ul style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; padding-left: 16px;">
+                        <li>Click calendar days to view or edit past activities</li>
+                        <li>Different activities have different productivity rates</li>
+                        <li>Aim for consistent daily progress rather than perfection</li>
+                        <li>Use the labels page to customize activity types</li>
+                        <li>Scores over 100 are possible and show maximum intensity</li>
+                    </ul>
+                </div>
+
+                <!-- Activity Legend -->
+                <div class="stats-panel">
+                    <h3>🏷️ Activity Types</h3>
+                    <div id="activity-legend" style="font-size: 12px;">
+                        <!-- Populated by JavaScript with current labels -->
+                    </div>
+                    <a href="/labels" class="btn btn-primary btn-small" style="margin-top: 12px; width: 100%;">
+                        Manage Labels
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <!-- Theme Switcher Script -->
+    <script>
+        // Theme switcher functionality
+        class ThemeSwitcher {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'light';
+                this.init();
+            }
+            
+            init() {
+                // Apply saved theme
+                this.applyTheme(this.theme);
+                
+                // Setup toggle button
+                const toggleBtn = document.getElementById('theme-toggle');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => this.toggleTheme());
+                }
+                
+                // Listen for system theme changes
+                if (window.matchMedia) {
+                    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    mediaQuery.addEventListener('change', (e) => {
+                        if (!localStorage.getItem('theme')) {
+                            this.applyTheme(e.matches ? 'dark' : 'light');
+                        }
+                    });
+                }
+            }
+            
+            toggleTheme() {
+                this.theme = this.theme === 'light' ? 'dark' : 'light';
+                this.applyTheme(this.theme);
+                localStorage.setItem('theme', this.theme);
+            }
+            
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                this.theme = theme;
+                
+                // Update calendar if it exists
+                if (window.app && window.app.calendar) {
+                    // Trigger a small visual refresh
+                    setTimeout(() => {
+                        const calendarContainer = document.getElementById('calendar-grid');
+                        if (calendarContainer) {
+                            calendarContainer.style.opacity = '0.8';
+                            setTimeout(() => {
+                                calendarContainer.style.opacity = '1';
+                            }, 150);
+                        }
+                    }, 100);
+                }
+            }
+        }
+        
+        // Initialize theme switcher immediately
+        const themeSwitcher = new ThemeSwitcher();
+    </script>
+
+    <!-- Additional CSS for today's score styling -->
+    <style>
+        .today-score.score-excellent {
+            color: var(--level-5) !important;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+        
+        .today-score.score-high {
+            color: var(--level-4) !important;
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+        }
+        
+        .today-score.score-medium {
+            color: var(--level-3) !important;
+            background: linear-gradient(135deg, #f0f8f0, #e8f5e8);
+        }
+        
+        .today-score.score-low {
+            color: var(--level-2) !important;
+            background: linear-gradient(135deg, #f8f9fa, #f0f8f0);
+        }
+        
+        .message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .activity-list-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 16px 0 8px 0;
+            color: var(--text-color);
+        }
+        
+        /* Enhanced form styling */
+        .form-row {
+            background-color: var(--light-gray);
+            padding: 16px;
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+        }
+        
+        /* Responsive enhancements */
+        @media (max-width: 768px) {
+            .form-row {
+                padding: 12px;
+            }
+            
+            .today-score {
+                font-size: 20px;
+                padding: 8px;
+            }
+            
+            .stats-panel,
+            .today-panel {
+                padding: 12px;
+            }
+        }
+    </style>
+</body>
+</html> 

@@ -1,0 +1,29 @@
+{
+  "2025-07-03": {
+    "activities": [
+      {
+        "duration": 45,
+        "label": "Work - typically 8 hours (480 minutes)",
+        "timestamp": "2025-07-03T18:51:44.641Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 120,
+        "timestamp": "2025-07-03T18:52:31.148Z"
+      }
+    ],
+    "total_score": 184.5,
+    "timestamp": "2025-07-03T21:52:31.151714"
+  },
+  "2025-07-10": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 200,
+        "timestamp": "2025-07-03T18:51:57.319Z"
+      }
+    ],
+    "total_score": 400.0,
+    "timestamp": "2025-07-03T21:51:57.323654"
+  }
+}

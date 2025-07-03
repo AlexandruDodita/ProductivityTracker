@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Labels - Productivity Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container">
+            <h1>🎯 Productivity Tracker</h1>
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <nav class="nav-links">
+                    <a href="/">Dashboard</a>
+                    <a href="/labels" class="active">Manage Labels</a>
+                </nav>
+                <div class="theme-switcher">
+                    <span class="theme-icon sun">☀️</span>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+                    <span class="theme-icon moon">🌙</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 28px; font-weight: 600; margin-bottom: 8px;">🏷️ Manage Activity Labels</h2>
+            <p style="color: var(--text-secondary); font-size: 16px;">
+                Configure activity types and their productivity rates. Each activity earns points per minute based on its rate.
+            </p>
+        </div>
+
+        <!-- Add New Label Form -->
+        <section class="activity-logger" style="margin-bottom: 32px;">
+            <h2>➕ Add New Label</h2>
+            <form id="label-form" class="activity-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="label-name">Label Name</label>
+                        <input type="text" id="label-name" name="name" 
+                               placeholder="e.g., Deep Work" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="label-rate">Productivity Rate (pts/min)</label>
+                        <input type="number" id="label-rate" name="productivity_rate" 
+                               step="0.01" min="0" max="10" placeholder="2.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="label-color">Color</label>
+                        <input type="color" id="label-color" name="color" value="#26d653">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="label-description">Description (Optional)</label>
+                    <input type="text" id="label-description" name="description" 
+                           placeholder="Focused, high-concentration work">
+                </div>
+                <button type="submit" class="btn btn-success">Create Label</button>
+            </form>
+        </section>
+
+        <!-- Existing Labels -->
+        <section>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0;">📋 Current Labels</h2>
+                <div style="font-size: 12px; color: var(--text-secondary);">
+                    Click a label to edit its settings
+                </div>
+            </div>
+            
+            <div id="labels-container" class="label-grid">
+                <div class="loading">Loading labels...</div>
+            </div>
+        </section>
+
+        <!-- Rate Guidelines -->
+        <section class="stats-panel" style="margin-top: 32px;">
+            <h3>💡 Productivity Rate Guidelines</h3>
+            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+                <div style="margin-bottom: 12px;">
+                    <strong>Suggested rates for different activity types:</strong>
+                </div>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong>2.0-3.0 pts/min:</strong> Deep work, coding, writing, creative tasks</li>
+                    <li><strong>1.5-2.0 pts/min:</strong> Learning, studying, skill development</li>
+                    <li><strong>1.0-1.5 pts/min:</strong> Planning, organizing, strategic thinking</li>
+                    <li><strong>0.5-1.0 pts/min:</strong> Meetings, emails, administrative tasks</li>
+                    <li><strong>0.1-0.5 pts/min:</strong> Light activities, breaks, routine tasks</li>
+                    <li><strong>0.0 pts/min:</strong> Rest, entertainment, off-time</li>
+                </ul>
+                <div style="margin-top: 12px; padding: 8px; background-color: var(--light-gray); border-radius: 4px;">
+                    <strong>Tip:</strong> Aim for 100 points per day. With 8 hours of 2.0 pts/min deep work, 
+                    you'd earn 960 points - adjust rates to match your personal productivity goals.
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Edit Label Modal -->
+    <div id="edit-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Edit Label</h3>
+                <button id="close-modal" class="btn btn-danger btn-small">×</button>
+            </div>
+            <form id="edit-label-form">
+                <input type="hidden" id="edit-label-original-name">
+                <div class="form-group">
+                    <label for="edit-label-name">Label Name</label>
+                    <input type="text" id="edit-label-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-label-rate">Productivity Rate (pts/min)</label>
+                    <input type="number" id="edit-label-rate" step="0.01" min="0" max="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-label-color">Color</label>
+                    <input type="color" id="edit-label-color">
+                </div>
+                <div class="form-group">
+                    <label for="edit-label-description">Description</label>
+                    <input type="text" id="edit-label-description">
+                </div>
+                <div class="form-group" style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary">Update Label</button>
+                    <button type="button" id="delete-label" class="btn btn-danger">Delete Label</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        /**
+         * Label Management Application
+         * Handles CRUD operations for activity labels and their configurations
+         */
+        class LabelManager {
+            constructor() {
+                this.labels = {};
+                this.currentEditingLabel = null;
+                this.init();
+            }
+            
+            async init() {
+                await this.loadLabels();
+                this.setupEventListeners();
+            }
+            
+            async loadLabels() {
+                try {
+                    const response = await fetch('/api/labels');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.labels = data.labels;
+                        this.renderLabels();
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Error loading labels:', error);
+                    this.showMessage('Failed to load labels', 'error');
+                }
+            }
+            
+            renderLabels() {
+                const container = document.getElementById('labels-container');
+                if (!container) return;
+                
+                if (Object.keys(this.labels).length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No labels configured yet. Create your first label above!</p>';
+                    return;
+                }
+                
+                container.innerHTML = Object.entries(this.labels).map(([name, data]) => `
+                    <div class="label-card" onclick="labelManager.editLabel('${name}')">
+                        <div class="label-header">
+                            <div>
+                                <div class="label-name">${name}</div>
+                                <div class="label-rate">${data.productivity_rate} pts/min</div>
+                            </div>
+                            <div class="color-indicator" style="background-color: ${data.color}"></div>
+                        </div>
+                        <div class="label-description">${data.description || 'No description'}</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">
+                            Click to edit • ${(data.productivity_rate * 60).toFixed(0)} pts/hour
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            setupEventListeners() {
+                // Add label form
+                document.getElementById('label-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createLabel();
+                });
+                
+                // Edit label form
+                document.getElementById('edit-label-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.updateLabel();
+                });
+                
+                // Modal controls
+                document.getElementById('close-modal').addEventListener('click', () => {
+                    this.closeModal();
+                });
+                
+                document.getElementById('delete-label').addEventListener('click', () => {
+                    this.deleteLabel();
+                });
+                
+                // Close modal on outside click
+                document.getElementById('edit-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'edit-modal') {
+                        this.closeModal();
+                    }
+                });
+            }
+            
+            async createLabel() {
+                try {
+                    const formData = new FormData(document.getElementById('label-form'));
+                    const payload = {
+                        name: formData.get('name'),
+                        productivity_rate: parseFloat(formData.get('productivity_rate')),
+                        description: formData.get('description') || '',
+                        color: formData.get('color')
+                    };
+                    
+                    const response = await fetch('/api/labels', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await this.loadLabels();
+                        document.getElementById('label-form').reset();
+                        document.getElementById('label-color').value = '#26d653';
+                        this.showMessage('Label created successfully!', 'success');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Error creating label:', error);
+                    this.showMessage('Failed to create label', 'error');
+                }
+            }
+            
+            editLabel(labelName) {
+                this.currentEditingLabel = labelName;
+                const labelData = this.labels[labelName];
+                
+                if (!labelData) return;
+                
+                // Populate edit form
+                document.getElementById('edit-label-original-name').value = labelName;
+                document.getElementById('edit-label-name').value = labelName;
+                document.getElementById('edit-label-rate').value = labelData.productivity_rate;
+                document.getElementById('edit-label-color').value = labelData.color;
+                document.getElementById('edit-label-description').value = labelData.description || '';
+                
+                // Show modal
+                document.getElementById('edit-modal').style.display = 'flex';
+            }
+            
+            async updateLabel() {
+                try {
+                    const originalName = document.getElementById('edit-label-original-name').value;
+                    const newName = document.getElementById('edit-label-name').value;
+                    const productivityRate = parseFloat(document.getElementById('edit-label-rate').value);
+                    const color = document.getElementById('edit-label-color').value;
+                    const description = document.getElementById('edit-label-description').value;
+                    
+                    // If name changed, we need to delete old and create new
+                    if (originalName !== newName) {
+                        await this.deleteLabel(originalName, false);
+                        
+                        const createResponse = await fetch('/api/labels', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: newName,
+                                productivity_rate: productivityRate,
+                                description: description,
+                                color: color
+                            })
+                        });
+                        
+                        const createData = await createResponse.json();
+                        if (!createData.success) throw new Error(createData.error);
+                        
+                    } else {
+                        // Update existing label
+                        const response = await fetch(`/api/labels/${originalName}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                productivity_rate: productivityRate,
+                                description: description,
+                                color: color
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        if (!data.success) throw new Error(data.error);
+                    }
+                    
+                    await this.loadLabels();
+                    this.closeModal();
+                    this.showMessage('Label updated successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error updating label:', error);
+                    this.showMessage('Failed to update label', 'error');
+                }
+            }
+            
+            async deleteLabel(labelName = null, showConfirm = true) {
+                const nameToDelete = labelName || this.currentEditingLabel;
+                
+                if (showConfirm && !confirm(`Are you sure you want to delete the "${nameToDelete}" label?`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/labels/${nameToDelete}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await this.loadLabels();
+                        if (showConfirm) {
+                            this.closeModal();
+                            this.showMessage('Label deleted successfully!', 'success');
+                        }
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Error deleting label:', error);
+                    if (showConfirm) {
+                        this.showMessage('Failed to delete label', 'error');
+                    }
+                }
+            }
+            
+            closeModal() {
+                document.getElementById('edit-modal').style.display = 'none';
+                this.currentEditingLabel = null;
+            }
+            
+            showMessage(message, type = 'info') {
+                const existingMessages = document.querySelectorAll('.message');
+                existingMessages.forEach(msg => msg.remove());
+                
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${type}-message`;
+                messageEl.textContent = message;
+                
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.insertBefore(messageEl, container.firstChild);
+                }
+                
+                setTimeout(() => messageEl.remove(), 5000);
+            }
+        }
+        
+        // Initialize label manager
+        let labelManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            labelManager = new LabelManager();
+        });
+    </script>
+    
+    <!-- Theme Switcher Script -->
+    <script>
+        // Theme switcher functionality
+        class ThemeSwitcher {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'light';
+                this.init();
+            }
+            
+            init() {
+                // Apply saved theme
+                this.applyTheme(this.theme);
+                
+                // Setup toggle button
+                const toggleBtn = document.getElementById('theme-toggle');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => this.toggleTheme());
+                }
+                
+                // Listen for system theme changes
+                if (window.matchMedia) {
+                    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    mediaQuery.addEventListener('change', (e) => {
+                        if (!localStorage.getItem('theme')) {
+                            this.applyTheme(e.matches ? 'dark' : 'light');
+                        }
+                    });
+                }
+            }
+            
+            toggleTheme() {
+                this.theme = this.theme === 'light' ? 'dark' : 'light';
+                this.applyTheme(this.theme);
+                localStorage.setItem('theme', this.theme);
+            }
+            
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                this.theme = theme;
+            }
+        }
+        
+        // Initialize theme switcher immediately
+        const themeSwitcher = new ThemeSwitcher();
+    </script>
+
+    <!-- Modal Styles -->
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--light-gray);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal form {
+            padding: 24px;
+        }
+        
+        .label-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .label-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .label-card:active {
+            transform: translateY(0);
+        }
+    </style>
+</body>
+</html> 
