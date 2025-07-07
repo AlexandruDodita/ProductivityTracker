@@ -1,29 +1,297 @@
 {
-  "2025-07-03": {
+  "2025-06-28": {
     "activities": [
       {
-        "duration": 45,
-        "label": "Work - typically 8 hours (480 minutes)",
-        "timestamp": "2025-07-03T18:51:44.641Z"
+        "label": "Deep Work",
+        "duration": 90,
+        "timestamp": "2025-06-28T09:00:00.000Z"
       },
       {
         "label": "Learning",
-        "duration": 120,
-        "timestamp": "2025-07-03T18:52:31.148Z"
+        "duration": 60,
+        "timestamp": "2025-06-28T14:00:00.000Z"
       }
     ],
-    "total_score": 184.5,
-    "timestamp": "2025-07-03T21:52:31.151714"
+    "total_score": 270.0,
+    "timestamp": "2025-06-28T21:00:00.000000"
+  },
+  "2025-06-29": {
+    "activities": [
+      {
+        "label": "Communication",
+        "duration": 120,
+        "timestamp": "2025-06-29T10:00:00.000Z"
+      },
+      {
+        "label": "Administrative",
+        "duration": 45,
+        "timestamp": "2025-06-29T15:00:00.000Z"
+      }
+    ],
+    "total_score": 118.5,
+    "timestamp": "2025-06-29T21:00:00.000000"
+  },
+  "2025-06-30": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 210,
+        "timestamp": "2025-06-30T08:30:00.000Z"
+      },
+      {
+        "label": "Planning",
+        "duration": 50,
+        "timestamp": "2025-06-30T13:00:00.000Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 40,
+        "timestamp": "2025-06-30T16:00:00.000Z"
+      }
+    ],
+    "total_score": 530.0,
+    "timestamp": "2025-06-30T21:00:00.000000"
+  },
+  "2025-07-01": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 120,
+        "timestamp": "2025-07-01T09:00:00.000Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 45,
+        "timestamp": "2025-07-01T11:00:00.000Z"
+      },
+      {
+        "label": "Administrative",
+        "duration": 30,
+        "timestamp": "2025-07-01T14:00:00.000Z"
+      }
+    ],
+    "total_score": 322.5,
+    "timestamp": "2025-07-01T21:00:00.000000"
+  },
+  "2025-07-02": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 180,
+        "timestamp": "2025-07-02T08:30:00.000Z"
+      },
+      {
+        "label": "Communication",
+        "duration": 60,
+        "timestamp": "2025-07-02T13:00:00.000Z"
+      },
+      {
+        "label": "Planning",
+        "duration": 40,
+        "timestamp": "2025-07-02T16:00:00.000Z"
+      }
+    ],
+    "total_score": 448.0,
+    "timestamp": "2025-07-02T21:00:00.000000"
+  },
+  "2025-07-03": {
+    "activities": [
+      {
+        "label": "Learning",
+        "duration": 90,
+        "timestamp": "2025-07-03T10:00:00.000Z"
+      },
+      {
+        "label": "Administrative",
+        "duration": 25,
+        "timestamp": "2025-07-03T15:30:00.000Z"
+      }
+    ],
+    "total_score": 147.5,
+    "timestamp": "2025-07-03T21:00:00.000000"
+  },
+  "2025-07-04": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 240,
+        "timestamp": "2025-07-04T09:00:00.000Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 60,
+        "timestamp": "2025-07-04T14:00:00.000Z"
+      },
+      {
+        "label": "Communication",
+        "duration": 45,
+        "timestamp": "2025-07-04T16:30:00.000Z"
+      }
+    ],
+    "total_score": 606.0,
+    "timestamp": "2025-07-04T21:00:00.000000"
+  },
+  "2025-07-05": {
+    "activities": [
+      {
+        "label": "Planning",
+        "duration": 80,
+        "timestamp": "2025-07-05T08:00:00.000Z"
+      },
+      {
+        "label": "Administrative",
+        "duration": 40,
+        "timestamp": "2025-07-05T11:00:00.000Z"
+      },
+      {
+        "label": "Break",
+        "duration": 30,
+        "timestamp": "2025-07-05T12:00:00.000Z"
+      }
+    ],
+    "total_score": 100.0,
+    "timestamp": "2025-07-05T21:00:00.000000"
+  },
+  "2025-07-06": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 150,
+        "timestamp": "2025-07-06T10:00:00.000Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 75,
+        "timestamp": "2025-07-06T14:00:00.000Z"
+      }
+    ],
+    "total_score": 412.5,
+    "timestamp": "2025-07-06T21:00:00.000000"
+  },
+  "2025-07-07": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 95,
+        "timestamp": "2025-07-07T09:00:00.000Z"
+      },
+      {
+        "label": "Communication",
+        "duration": 40,
+        "timestamp": "2025-07-07T15:00:00.000Z"
+      },
+      {
+        "label": "Administrative",
+        "duration": 14,
+        "timestamp": "2025-07-07T18:42:07.235Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 51,
+        "timestamp": "2025-07-07T18:42:11.253Z"
+      }
+    ],
+    "total_score": 297.1,
+    "timestamp": "2025-07-07T21:42:17.899334"
+  },
+  "2025-07-08": {
+    "activities": [
+      {
+        "label": "Deep Work",
+        "duration": 200,
+        "timestamp": "2025-07-08T09:00:00.000Z"
+      },
+      {
+        "label": "Planning",
+        "duration": 60,
+        "timestamp": "2025-07-08T14:00:00.000Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 15,
+        "timestamp": "2025-07-08T18:42:32.281Z"
+      }
+    ],
+    "total_score": 482.5,
+    "timestamp": "2025-07-08T21:00:00.000000"
+  },
+  "2025-07-09": {
+    "activities": [
+      {
+        "label": "Communication",
+        "duration": 90,
+        "timestamp": "2025-07-09T10:00:00.000Z"
+      },
+      {
+        "label": "Administrative",
+        "duration": 50,
+        "timestamp": "2025-07-09T13:00:00.000Z"
+      },
+      {
+        "label": "Learning",
+        "duration": 45,
+        "timestamp": "2025-07-09T16:00:00.000Z"
+      }
+    ],
+    "total_score": 164.5,
+    "timestamp": "2025-07-09T21:00:00.000000"
   },
   "2025-07-10": {
     "activities": [
       {
         "label": "Deep Work",
-        "duration": 200,
-        "timestamp": "2025-07-03T18:51:57.319Z"
+        "duration": 312,
+        "timestamp": "2025-07-10T09:00:00.000Z"
+      },
+      {
+        "label": "Planning",
+        "duration": 35,
+        "timestamp": "2025-07-10T14:00:00.000Z"
       }
     ],
-    "total_score": 400.0,
-    "timestamp": "2025-07-03T21:51:57.323654"
+    "total_score": 659.0,
+    "timestamp": "2025-07-10T21:00:00.000000"
+  },
+  "2025-07-11": {
+    "activities": [
+      {
+        "label": "Learning",
+        "duration": 120,
+        "timestamp": "2025-07-11T09:00:00.000Z"
+      },
+      {
+        "label": "Deep Work",
+        "duration": 180,
+        "timestamp": "2025-07-11T11:00:00.000Z"
+      },
+      {
+        "label": "Communication",
+        "duration": 30,
+        "timestamp": "2025-07-11T15:00:00.000Z"
+      }
+    ],
+    "total_score": 564.0,
+    "timestamp": "2025-07-11T21:00:00.000000"
+  },
+  "2025-07-12": {
+    "activities": [
+      {
+        "label": "Administrative",
+        "duration": 60,
+        "timestamp": "2025-07-12T08:00:00.000Z"
+      },
+      {
+        "label": "Planning",
+        "duration": 90,
+        "timestamp": "2025-07-12T10:00:00.000Z"
+      },
+      {
+        "label": "Deep Work",
+        "duration": 150,
+        "timestamp": "2025-07-12T14:00:00.000Z"
+      }
+    ],
+    "total_score": 420.0,
+    "timestamp": "2025-07-12T21:00:00.000000"
   }
 }

@@ -192,7 +192,7 @@ class CalendarHeatmap {
         while (currentDate <= endDate) {
             const dateStr = this.formatDate(currentDate);
             const weekIndex = this.getWeekOfYear(currentDate);
-            const dayOfWeek = currentDate.getDay();
+                        const dayOfWeek = currentDate.getDay();
             
             // Calculate position
             const x = startX + weekIndex * (cellSize + cellGap);
@@ -361,12 +361,25 @@ class CalendarHeatmap {
     
     /**
      * Calculates the week number of the year for a given date.
-     * Uses ISO week numbering for consistent calendar layout across years.
+     * Uses GitHub-style week numbering where weeks start on Sunday.
+     * Ensures Saturday and Sunday are always in the same week column.
      */
     getWeekOfYear(date) {
-        const firstDay = new Date(date.getFullYear(), 0, 1);
-        const dayOfYear = Math.floor((date - firstDay) / (24 * 60 * 60 * 1000));
-        const weekNumber = Math.floor((dayOfYear + firstDay.getDay()) / 7);
+        const year = date.getFullYear();
+        const jan1 = new Date(year, 0, 1);
+        
+        // Find the Sunday that starts the week containing this date
+        const sunday = new Date(date);
+        sunday.setDate(date.getDate() - date.getDay()); // Go back to Sunday of this week
+        
+        // Find the Sunday that starts the week containing January 1st
+        const jan1Sunday = new Date(jan1);
+        jan1Sunday.setDate(jan1.getDate() - jan1.getDay()); // Go back to Sunday of Jan 1st week
+        
+        // Calculate weeks between the two Sundays
+        const daysBetween = Math.floor((sunday - jan1Sunday) / (24 * 60 * 60 * 1000));
+        const weekNumber = Math.floor(daysBetween / 7);
+        
         return weekNumber;
     }
     

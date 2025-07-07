@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Graphs - Productivity Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container">
+            <h1>📊 Productivity Graphs</h1>
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <nav class="nav-links">
+                    <a href="/">Dashboard</a>
+                    <a href="/graphs" class="active">Graphs</a>
+                    <a href="/labels">Manage Labels</a>
+                </nav>
+                <div class="theme-switcher">
+                    <span class="theme-icon sun">☀️</span>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+                    <span class="theme-icon moon">🌙</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Controls Section -->
+        <section class="controls-section">
+            <div class="controls-panel">
+                <h2>📈 Analysis Controls</h2>
+                <div class="control-group">
+                    <label for="time-period">Time Period</label>
+                    <select id="time-period" class="form-control">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="60">Last 60 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button id="refresh-data" class="btn btn-primary">🔄 Refresh Data</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Overview -->
+        <section class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-days">0</div>
+                        <div class="stat-label">Total Days</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="productive-days">0</div>
+                        <div class="stat-label">Productive Days</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="avg-score">0</div>
+                        <div class="stat-label">Avg Daily Score</div>
+                    </div>
+                </div>
+                <div class="stat-card trend-card">
+                    <div class="stat-icon" id="trend-icon">📈</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="trend-value">0%</div>
+                        <div class="stat-label">Weekly Trend</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <!-- Daily Trend Chart -->
+            <section class="chart-container">
+                <div class="chart-header">
+                    <h3>📈 Daily Productivity Trend</h3>
+                    <div class="chart-controls">
+                        <button class="btn btn-small" onclick="graphApp.switchTrendView('daily')" id="daily-btn">Daily</button>
+                        <button class="btn btn-small btn-secondary" onclick="graphApp.switchTrendView('weekly')" id="weekly-btn">Weekly</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trend-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Activity Time Distribution -->
+            <section class="chart-container">
+                <div class="chart-header">
+                    <h3>⏰ Time Distribution by Activity</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="time-pie-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Activity Score Distribution -->
+            <section class="chart-container">
+                <div class="chart-header">
+                    <h3>🎯 Score Distribution by Activity</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="score-pie-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Activity Comparison Bar Chart -->
+            <section class="chart-container">
+                <div class="chart-header">
+                    <h3>📊 Activity Performance Comparison</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="activity-bar-chart"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Data Insights Panel -->
+        <section class="insights-panel">
+            <h3>💡 Productivity Insights</h3>
+            <div id="insights-content" class="insights-content">
+                <!-- Insights populated by JavaScript -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/graphs.js') }}"></script>
+    
+    <!-- Theme Switcher Script -->
+    <script>
+        // Theme switcher functionality (same as index.html)
+        class ThemeSwitcher {
+            constructor() {
+                this.theme = localStorage.getItem('theme') || 'light';
+                this.init();
+            }
+            
+            init() {
+                // Apply saved theme
+                this.applyTheme(this.theme);
+                
+                // Setup toggle button
+                const toggleBtn = document.getElementById('theme-toggle');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => this.toggleTheme());
+                }
+                
+                // Listen for system theme changes
+                if (window.matchMedia) {
+                    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    mediaQuery.addEventListener('change', (e) => {
+                        if (!localStorage.getItem('theme')) {
+                            this.applyTheme(e.matches ? 'dark' : 'light');
+                        }
+                    });
+                }
+            }
+            
+            toggleTheme() {
+                this.theme = this.theme === 'light' ? 'dark' : 'light';
+                this.applyTheme(this.theme);
+                localStorage.setItem('theme', this.theme);
+            }
+            
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                this.theme = theme;
+                
+                // Update charts if they exist
+                if (window.graphApp) {
+                    window.graphApp.updateChartThemes();
+                }
+            }
+        }
+        
+        // Initialize theme switcher
+        const themeSwitcher = new ThemeSwitcher();
+    </script>
+</body>
+</html> 

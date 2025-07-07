@@ -29,6 +29,12 @@ class ProductivityApp:
         self.app.route('/api/labels', methods=['POST'])(self.create_label)
         self.app.route('/api/labels/<label_name>', methods=['PUT'])(self.update_label)
         self.app.route('/api/labels/<label_name>', methods=['DELETE'])(self.delete_label)
+        # Graph routes
+        self.app.route('/graphs', methods=['GET'])(self.graphs)
+        self.app.route('/api/graph-data/daily-trend', methods=['GET'])(self.get_daily_trend_api)
+        self.app.route('/api/graph-data/weekly-trend', methods=['GET'])(self.get_weekly_trend_api)
+        self.app.route('/api/graph-data/activity-breakdown', methods=['GET'])(self.get_activity_breakdown_api)
+        self.app.route('/api/graph-data/productivity-stats', methods=['GET'])(self.get_productivity_stats_api)
     
     def index(self):
         """
@@ -273,6 +279,77 @@ class ProductivityApp:
                     'success': False
                 }), 404
                 
+        except Exception as e:
+            return jsonify({
+                'error': str(e),
+                'success': False
+            }), 500
+    
+    def graphs(self):
+        """
+        Renders the graph analytics page with comprehensive productivity visualizations.
+        Provides multiple chart types for deep productivity analysis and trend identification.
+        """
+        return render_template('graphs.html')
+    
+    def get_daily_trend_api(self):
+        """API endpoint for daily productivity trend data used in line charts."""
+        try:
+            days = int(request.args.get('days', 30))
+            data = self.productivity_tracker.get_daily_trend_data(days)
+            
+            return jsonify({
+                'data': data,
+                'success': True
+            })
+        except Exception as e:
+            return jsonify({
+                'error': str(e),
+                'success': False
+            }), 500
+    
+    def get_weekly_trend_api(self):
+        """API endpoint for weekly productivity trend data used in line charts."""
+        try:
+            weeks = int(request.args.get('weeks', 12))
+            data = self.productivity_tracker.get_weekly_trend_data(weeks)
+            
+            return jsonify({
+                'data': data,
+                'success': True
+            })
+        except Exception as e:
+            return jsonify({
+                'error': str(e),
+                'success': False
+            }), 500
+    
+    def get_activity_breakdown_api(self):
+        """API endpoint for activity breakdown data used in pie and bar charts."""
+        try:
+            days = int(request.args.get('days', 30))
+            data = self.productivity_tracker.get_activity_breakdown_data(days)
+            
+            return jsonify({
+                'data': data,
+                'success': True
+            })
+        except Exception as e:
+            return jsonify({
+                'error': str(e),
+                'success': False
+            }), 500
+    
+    def get_productivity_stats_api(self):
+        """API endpoint for comprehensive productivity statistics and metrics."""
+        try:
+            days = int(request.args.get('days', 30))
+            data = self.productivity_tracker.get_productivity_stats(days)
+            
+            return jsonify({
+                'data': data,
+                'success': True
+            })
         except Exception as e:
             return jsonify({
                 'error': str(e),

@@ -105,11 +105,12 @@ class ProductivityTracker:
         """
         calendar_data = {}
         
-        # If no date range specified, use last 365 days
+        # If no date range specified, use last 365 days and extend to future
         if not start_date:
             start_date = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
         if not end_date:
-            end_date = datetime.now().strftime('%Y-%m-%d')
+            # Allow future dates to be displayed (extend 30 days into future)
+            end_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
         
         # Filter and format data for the specified range
         for date_str, entry in self.productivity_data.items():
@@ -121,6 +122,197 @@ class ProductivityTracker:
     def get_productivity_entry(self, date: str) -> Optional[Dict]:
         """Retrieves productivity entry for a specific date."""
         return self.productivity_data.get(date)
+    
+    def get_daily_trend_data(self, days: int = 30) -> Dict[str, List]:
+        """
+        Provides daily productivity trend data for line charts.
+        Returns data for the specified number of recent days.
+        
+        Args:
+            days: Number of recent days to include in the trend
+            
+        Returns:
+            Dictionary with dates and scores arrays for chart visualization
+        """
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days-1)
+        
+        dates = []
+        scores = []
+        
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.strftime('%Y-%m-%d')
+            dates.append(date_str)
+            
+            entry = self.productivity_data.get(date_str)
+            score = entry.get('total_score', 0) if entry else 0
+            scores.append(score)
+            
+            current_date += timedelta(days=1)
+        
+        return {
+            'dates': dates,
+            'scores': scores,
+            'labels': [datetime.strptime(d, '%Y-%m-%d').strftime('%m/%d') for d in dates]
+        }
+    
+    def get_weekly_trend_data(self, weeks: int = 12) -> Dict[str, List]:
+        """
+        Provides weekly productivity trend data aggregated from daily scores.
+        Returns data for the specified number of recent weeks.
+        """
+        end_date = datetime.now()
+        
+        weeks_data = []
+        labels = []
+        
+        for week_offset in range(weeks-1, -1, -1):
+            week_start = end_date - timedelta(days=end_date.weekday() + (week_offset * 7))
+            week_end = week_start + timedelta(days=6)
+            
+            # Calculate total score for the week
+            week_score = 0.0
+            for day_offset in range(7):
+                day_date = week_start + timedelta(days=day_offset)
+                date_str = day_date.strftime('%Y-%m-%d')
+                entry = self.productivity_data.get(date_str)
+                if entry:
+                    week_score += entry.get('total_score', 0)
+            
+            weeks_data.append(round(week_score, 2))
+            labels.append(f"{week_start.strftime('%m/%d')}")
+        
+        return {
+            'weeks': list(range(1, weeks+1)),
+            'scores': weeks_data,
+            'labels': labels
+        }
+    
+    def get_activity_breakdown_data(self, days: int = 30) -> Dict[str, any]:
+        """
+        Provides activity breakdown data for pie charts and bar charts.
+        Analyzes time spent and productivity by activity type.
+        
+        Args:
+            days: Number of recent days to analyze
+            
+        Returns:
+            Dictionary with activity statistics for visualization
+        """
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days-1)
+        
+        activity_stats = {}
+        
+        # Analyze each day in the range
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.strftime('%Y-%m-%d')
+            entry = self.productivity_data.get(date_str)
+            
+            if entry and 'activities' in entry:
+                for activity in entry['activities']:
+                    label = activity.get('label', 'Unknown')
+                    duration = float(activity.get('duration', 0))
+                    
+                    if label not in activity_stats:
+                        activity_stats[label] = {
+                            'total_time': 0,
+                            'total_score': 0,
+                            'activity_count': 0
+                        }
+                    
+                    activity_stats[label]['total_time'] += duration
+                    activity_stats[label]['activity_count'] += 1
+                    
+                    # Calculate score contribution
+                    if self.label_manager:
+                        label_data = self.label_manager.get_label(label)
+                        if label_data:
+                            rate = label_data.get('productivity_rate', 0)
+                            activity_stats[label]['total_score'] += duration * rate
+            
+            current_date += timedelta(days=1)
+        
+        # Format data for charts
+        labels = list(activity_stats.keys())
+        time_data = [round(activity_stats[label]['total_time'], 2) for label in labels]
+        score_data = [round(activity_stats[label]['total_score'], 2) for label in labels]
+        
+        # Get colors from label manager
+        colors = []
+        if self.label_manager:
+            for label in labels:
+                label_data = self.label_manager.get_label(label)
+                color = label_data.get('color', '#26d653') if label_data else '#26d653'
+                colors.append(color)
+        else:
+            colors = ['#26d653'] * len(labels)
+        
+        return {
+            'labels': labels,
+            'time_data': time_data,
+            'score_data': score_data,
+            'colors': colors,
+            'total_time': sum(time_data),
+            'total_score': sum(score_data)
+        }
+    
+    def get_productivity_stats(self, days: int = 30) -> Dict[str, any]:
+        """
+        Provides comprehensive productivity statistics for dashboard display.
+        Includes trends, averages, and performance metrics.
+        """
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days-1)
+        
+        daily_scores = []
+        productive_days = 0
+        total_activities = 0
+        
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.strftime('%Y-%m-%d')
+            entry = self.productivity_data.get(date_str)
+            
+            if entry:
+                score = entry.get('total_score', 0)
+                daily_scores.append(score)
+                if score > 0:
+                    productive_days += 1
+                
+                activities = entry.get('activities', [])
+                total_activities += len(activities)
+            else:
+                daily_scores.append(0)
+            
+            current_date += timedelta(days=1)
+        
+        # Calculate statistics
+        avg_score = sum(daily_scores) / len(daily_scores) if daily_scores else 0
+        max_score = max(daily_scores) if daily_scores else 0
+        min_score = min(daily_scores) if daily_scores else 0
+        
+        # Calculate trend (simple slope of last 7 days vs previous 7 days)
+        trend = 0
+        if len(daily_scores) >= 14:
+            recent_avg = sum(daily_scores[-7:]) / 7
+            previous_avg = sum(daily_scores[-14:-7]) / 7
+            trend = ((recent_avg - previous_avg) / previous_avg * 100) if previous_avg > 0 else 0
+        
+        return {
+            'period_days': days,
+            'productive_days': productive_days,
+            'productivity_rate': (productive_days / days * 100) if days > 0 else 0,
+            'avg_daily_score': round(avg_score, 2),
+            'max_daily_score': round(max_score, 2),
+            'min_daily_score': round(min_score, 2),
+            'total_score': round(sum(daily_scores), 2),
+            'total_activities': total_activities,
+            'trend_percentage': round(trend, 1),
+            'daily_scores': daily_scores
+        }
     
     def _save_to_file(self) -> None:
         """Persists current productivity data to JSON file."""
